@@ -7,6 +7,10 @@ PKG phppgadmin-php82 php82-pgsql php82-fileinfo php82-session php82-curl adodb5-
 # copy files
 CP usr /
 
+# CGI configuration
+CMD sed -i -e '/mod_cgid.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/httpd.conf
+CMD sed -i -e '/mod_cgi.so/s/LoadModule/#LoadModule/' /usr/local/etc/apache24/httpd.conf
+
 # Apache configuration PHP
 CMD sed -i '' '/mod_mpm_event.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/httpd.conf
 CMD sed -i '' '/mod_mpm_prefork.so/s/LoadModule/#LoadModule/' /usr/local/etc/apache24/httpd.conf

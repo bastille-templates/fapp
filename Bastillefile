@@ -1,0 +1,30 @@
+# install required famp
+INCLUDE https://github.com/bastille-templates/apache
+INCLUDE https://github.com/bastille-templates/php
+INCLUDE https://github.com/bastille-templates/postgresql
+
+PKG phppgadmin-php82 php82-pgsql php82-fileinfo php82-session php82-curl adodb5-php82
+# copy files
+CP usr /
+
+# Apache configuration PHP
+CMD sed -i '' '/mod_mpm_event.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/httpd.conf
+CMD sed -i '' '/mod_mpm_prefork.so/s/LoadModule/#LoadModule/' /usr/local/etc/apache24/httpd.conf
+CMD sed -i '' '/mod_proxy.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/httpd.conf
+CMD sed -i '' '/mod_proxy_fcgi.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/httpd.conf
+CMD sed -i '' 's%ServerAdmin you@example.com%ServerAdmin admin@${JAIL_IP}%g' /usr/local/etc/apache24/extra/httpd-ssl.conf
+CMD sed -i '' 's%ServerName www.example.com:443%ServerName ${JAIL_IP}:443%g' /usr/local/etc/apache24/extra/httpd-ssl.conf
+CMD printf '<?php phpinfo(); ?>\n\n' > /usr/local/www/apache24/data/info.php
+
+# Apps configuration PHPMyAdmin
+CMD mysql -u root -e "CREATE DATABASE IF NOT EXISTS phpmyadmin;"
+CMD mysql -u root -e "CREATE USER IF NOT EXISTS pma@'localhost' identified by 'pmapass'"
+CMD mysql -u root -e "GRANT ALL PRIVILEGES on phpmyadmin.* to pma@'localhost'"
+CMD mysql -u root -e "FLUSH PRIVILEGES"
+CMD cd /usr/local/www/phpMyAdmin/sql && mysql < create_tables.sql
+CMD sed -i '' 's%Require ip 127.0.0.1 xx.xx.xx.xx%Require ip 127.0.0.1 ${JAIL_IP}%g' /usr/local/etc/apache24/Includes/phpmyadmin.conf
+CMD cp /usr/local/etc/apache24/Includes/phpmyadmin.conf.sample /usr/local/etc/apache24/Includes/phpmyadmin.conf
+CMD chown -R www:www /usr/local/www/phpMyAdmin
+
+SERVICE php_fpm restart
+SERVICE apache24 restart

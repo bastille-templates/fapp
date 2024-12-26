@@ -1,4 +1,5 @@
-# install required famp
+# install required fapp
+INCLUDE https://github.com/bastille-templates/openssl
 INCLUDE https://github.com/bastille-templates/apache
 INCLUDE https://github.com/bastille-templates/php
 INCLUDE https://github.com/bastille-templates/postgresql
@@ -8,8 +9,8 @@ PKG phppgadmin-php82 php82-pgsql php82-fileinfo php82-session php82-curl adodb5-
 CP usr /
 
 # CGI configuration
-CMD sed -i -e '/mod_cgid.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/httpd.conf
-CMD sed -i -e '/mod_cgi.so/s/LoadModule/#LoadModule/' /usr/local/etc/apache24/httpd.conf
+CMD sed -i '' '/mod_cgid.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/httpd.conf
+CMD sed -i '' '/mod_cgi.so/s/LoadModule/#LoadModule/' /usr/local/etc/apache24/httpd.conf
 
 # Apache configuration PHP
 CMD sed -i '' '/mod_mpm_event.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/httpd.conf
@@ -18,17 +19,24 @@ CMD sed -i '' '/mod_proxy.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/
 CMD sed -i '' '/mod_proxy_fcgi.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/httpd.conf
 CMD sed -i '' 's%ServerAdmin you@example.com%ServerAdmin admin@${JAIL_IP}%g' /usr/local/etc/apache24/extra/httpd-ssl.conf
 CMD sed -i '' 's%ServerName www.example.com:443%ServerName ${JAIL_IP}:443%g' /usr/local/etc/apache24/extra/httpd-ssl.conf
+#CMD cd /root && sh bootstrap.sh
 CMD printf '<?php phpinfo(); ?>\n\n' > /usr/local/www/apache24/data/info.php
+#CMD rm /root/bootstrap.sh
 
-# Apps configuration PHPMyAdmin
-CMD mysql -u root -e "CREATE DATABASE IF NOT EXISTS phpmyadmin;"
-CMD mysql -u root -e "CREATE USER IF NOT EXISTS pma@'localhost' identified by 'pmapass'"
-CMD mysql -u root -e "GRANT ALL PRIVILEGES on phpmyadmin.* to pma@'localhost'"
-CMD mysql -u root -e "FLUSH PRIVILEGES"
-CMD cd /usr/local/www/phpMyAdmin/sql && mysql < create_tables.sql
-CMD sed -i '' 's%Require ip 127.0.0.1 xx.xx.xx.xx%Require ip 127.0.0.1 ${JAIL_IP}%g' /usr/local/etc/apache24/Includes/phpmyadmin.conf
-CMD cp /usr/local/etc/apache24/Includes/phpmyadmin.conf.sample /usr/local/etc/apache24/Includes/phpmyadmin.conf
-CMD chown -R www:www /usr/local/www/phpMyAdmin
+# SSL
+CMD sed -i '' '/mod_socache_shmcb.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/httpd.conf
+CMD sed -i '' '/mod_ssl.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/httpd.conf
+CMD sed -i '' '/httpd-ssl.conf/s/#Include/Include/' /usr/local/etc/apache24/httpd.conf
+CMD sed -i '' '/mod_rewrite.so/s/#LoadModule/LoadModule/' /usr/local/etc/apache24/httpd.conf
+CMD echo '' >> /usr/local/etc/apache24/httpd.conf
+CMD echo 'RewriteEngine On' >> /usr/local/etc/apache24/httpd.conf
+CMD echo 'RewriteCond %{HTTPS} !=on' >> /usr/local/etc/apache24/httpd.conf
+CMD echo 'RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]' >> /usr/local/etc/apache24/httpd.conf
+
+# Apps configuration PHPPgAdmin
+CMD sed -i '' 's%Require ip 127.0.0.1 xx.xx.xx.xx%Require ip 127.0.0.1 ${JAIL_IP}%g' /usr/local/etc/apache24/Includes/phppgadmin.conf
+CMD cp /usr/local/etc/apache24/Includes/phppgadmin.conf.sample /usr/local/etc/apache24/Includes/phppgadmin.conf
+CMD chown -R www:www /usr/local/www/phpPgAdmin
 
 SERVICE php_fpm restart
 SERVICE apache24 restart

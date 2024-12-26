@@ -40,3 +40,4 @@ CMD chown -R www:www /usr/local/www/phpPgAdmin
 
 SERVICE php_fpm restart
 SERVICE apache24 restart
+SERVICE postgresql restart

@@ -1,3 +1,7 @@
+CONFIG set allow.raw_sockets=1
+
+RESTART
+
 # install required fapp
 INCLUDE https://github.com/bastille-templates/openssl
 INCLUDE https://github.com/bastille-templates/apache

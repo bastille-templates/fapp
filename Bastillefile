@@ -32,6 +32,7 @@ CMD echo '' >> /usr/local/etc/apache24/httpd.conf
 CMD echo 'RewriteEngine On' >> /usr/local/etc/apache24/httpd.conf
 CMD echo 'RewriteCond %{HTTPS} !=on' >> /usr/local/etc/apache24/httpd.conf
 CMD echo 'RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]' >> /usr/local/etc/apache24/httpd.conf
+CMD echo 'host    phppgadmin      pga             ${JAIL_IP}/32          trust' >> /var/db/postgres/data16/pg_hba.conf
 
 # Apps configuration PHPPgAdmin
 CMD sed -i '' 's%Require ip 127.0.0.1 xx.xx.xx.xx%Require ip 127.0.0.1 ${JAIL_IP}%g' /usr/local/etc/apache24/Includes/phppgadmin.conf

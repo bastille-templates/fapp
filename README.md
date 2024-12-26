@@ -1,4 +1,4 @@
-# FAPP / FreeBSD, Apache, PostgreSQL and PHP(PHPPgAdmin)
+# FAPP / FreeBSD, Apache, PostgreSQL and PHP(PHPPgpga)
 ## Now apply template to container
 ```sh
 bastille create fapp 14.1-RELEASE YourIP-Bastille
@@ -22,17 +22,19 @@ root@www:~ # su - postgres
 postgres@www:~ $ psql -c "ALTER USER postgres WITH PASSWORD 'yourpasswd'"
 
 # Managemen User;
-postgres@www:~ $ createuser admin -P
-postgres@www:~ $ dropuser admin
+postgres@www:~ $ createuser pga -P
+Enter password for new role: pgapass
+Enter it again: pgapass
+postgres@www:~ $ dropuser pga
 
 # Managemen Database;
-postgres@www:~ $ createdb testdb -O admin
-postgres@www:~ $ dropdb testdb
+postgres@www:~ $ createdb phppgadmin -O pga
+postgres@www:~ $ dropdb phppgadmin
 
 # show users and databases
 postgres@www:~ $ psql -c "select usename from pg_user;"
 postgres@www:~ $ psql -l
 
-# connect to testdb
-postgres@www:~ $ psql testdb
+# connect to phppgadmin
+postgres@www:~ $ psql phppgadmin
 ```
